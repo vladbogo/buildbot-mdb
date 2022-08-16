@@ -22,22 +22,20 @@ RUN --mount=type=secret,id=rhel_orgid,target=/run/secrets/rhel_orgid \
     ccache \
     check-devel \
     cmake3 \
-    cracklib-devel \
     curl-devel \
     jemalloc-devel \
     libffi-devel \
     libxml2-devel \
-    lz4-devel \
-    pcre2-devel \
     python3-pip \
     scons \
-    snappy-devel \
     systemd-devel \
     wget \
-    && if [ "$(arch)" = "ppc64le" ]; then \
-        subscription-manager repos --enable rhel-7-for-power-le-optional-rpms; \
-        yum -y install python3-devel; \
-    fi \
+    && printf '[centos]\nname=CentOS-7\nbaseurl=http://ftp.heanet.ie/pub/centos/7/os/x86_64/\nenabled=1\ngpgcheck=1\ngpgkey=http://ftp.heanet.ie/pub/centos/7/os/x86_64/RPM-GPG-KEY-CentOS-7' > /etc/yum.repos.d/centos.repo \
+    && yum -y install \
+    cracklib-devel \
+    lz4-devel \
+    pcre2-devel \
+    snappy-devel \
     && yum clean all \
     && subscription-manager unregister \
     # We can't use old cmake version (from @development package) \
