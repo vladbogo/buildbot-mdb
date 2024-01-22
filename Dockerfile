@@ -7,6 +7,20 @@ ARG master_type="master"
 
 WORKDIR /opt/buildbot
 # hadolint ignore=DL3003
+RUN apt-get update && apt-get install -y curl
+ENV NVM_DIR /usr/local/nvm
+ENV NODE_VERSION 16.10.0
+
+RUN mkdir -p $NVM_DIR \
+    && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash \
+    && . $NVM_DIR/nvm.sh \
+    && nvm install $NODE_VERSION \
+    && nvm alias default $NODE_VERSION \
+    && nvm use default
+
+ENV NODE_PATH $NVM_DIR/versions/node/v$NODE_VERSION/lib/node_modules
+ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
+
 RUN apt-get update \
     && apt-get upgrade -y \
     && apt-get -y install --no-install-recommends \
@@ -24,12 +38,11 @@ RUN apt-get update \
       python3-venv \
     && if [ "$master_type" = "master-web" ]; then \
       apt-get -y install --no-install-recommends \
-        libcairo2 \
-        yarnpkg; \
-      export PATH="/usr/share/nodejs/yarn/bin:$PATH"; \
-      yarn global --ignore-engines add gulp yo generator-buildbot-dashboard; \
+        libcairo2; \
+      npm install --global yarn \
+      yarn global --ignore-engines add gulp yo generator-buildbot-dashboard vite @babel/runtime; \
     fi \
-    && git clone --branch grid https://github.com/vladbogo/buildbot . \
+    && git clone --branch mariadb_changes https://github.com/vladbogo/buildbot . \
     && python3 -m venv .venv \
     && . .venv/bin/activate \
     && if [ "$master_type" = "master-web" ]; then \
